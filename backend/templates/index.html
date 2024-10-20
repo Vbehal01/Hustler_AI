@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hustler AI - Brand Research</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <style>
+    .bg-primary { background-color: #4F46E5; }
+    .text-primary { color: #4F46E5; }
+    .border-primary { border-color: #4F46E5; }
+    .hover\:bg-primary-dark:hover { background-color: #4338CA; }
+  </style>
+</head>
+<body class="bg-gray-100 font-sans">
+  <nav class="bg-primary p-4 text-white">
+    <div class="container mx-auto">
+      <h1 class="text-2xl font-bold">Hustler AI</h1>
+    </div>
+  </nav>
+
+  <main class="container mx-auto mt-8 px-4">
+    <div class="bg-white rounded-lg shadow-md p-8 max-w-2xl mx-auto">
+      <h2 class="text-3xl font-bold mb-6 text-gray-800 text-center">Brand Research</h2>
+
+      <form id="research-form" action="/do_research/" method="post" class="space-y-6">
+        <div>
+          <label for="brand_name" class="block text-sm font-medium text-gray-700 mb-1">Enter a brand name:</label>
+          <input type="text" id="brand_name" name="brand_name" required class="w-full p-2 border border-gray-300 rounded focus:ring-primary focus:border-primary">
+        </div>
+
+        <div>
+          <label for="user_company_info" class="block text-sm font-medium text-gray-700 mb-1">Your Company Information:</label>
+          <textarea id="user_company_info" name="user_company_info" rows="4" required class="w-full p-2 border border-gray-300 rounded focus:ring-primary focus:border-primary"></textarea>
+        </div>
+
+        <div>
+          <label for="outreach_goal" class="block text-sm font-medium text-gray-700 mb-1">Outreach Goal:</label>
+          <input type="text" id="outreach_goal" name="outreach_goal" required class="w-full p-2 border border-gray-300 rounded focus:ring-primary focus:border-primary">
+        </div>
+
+        <div>
+          <label for="desired_cta" class="block text-sm font-medium text-gray-700 mb-1">Desired Call to Action:</label>
+          <input type="text" id="desired_cta" name="desired_cta" required class="w-full p-2 border border-gray-300 rounded focus:ring-primary focus:border-primary">
+        </div>
+
+        <div>
+          <button type="submit" class="w-full bg-primary text-white py-2 px-4 rounded hover:bg-primary-dark transition duration-300">
+            Research
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <div class="mt-8 text-center">
+      <a href="/crm_dashboard/" class="text-primary hover:underline">View CRM Dashboard</a>
+    </div>
+  </main>
+
+  <footer class="bg-gray-800 text-white mt-12 py-6">
+    <div class="container mx-auto text-center">
+      <p>&copy; 2024 Hustler AI. All rights reserved.</p>
+    </div>
+  </footer>
+</body>
+</html>

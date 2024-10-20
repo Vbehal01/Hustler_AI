@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hustler AI - CRM Dashboard</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <style>
+    .bg-primary { background-color: #4F46E5; }
+    .text-primary { color: #4F46E5; }
+    .border-primary { border-color: #4F46E5; }
+    .hover\:bg-primary-dark:hover { background-color: #4338CA; }
+  </style>
+</head>
+<body class="bg-gray-100 font-sans">
+  <nav class="bg-primary p-4 text-white">
+    <div class="container mx-auto">
+      <h1 class="text-2xl font-bold">Hustler AI - CRM Dashboard</h1>
+    </div>
+  </nav>
+
+  <main class="container mx-auto mt-8 px-4">
+    <h2 class="text-3xl font-bold mb-6 text-gray-800">Leads</h2>
+
+    <!-- FastAPI Flash Messages (Simulating the functionality in FastAPI) -->
+    {% if flash_messages %}
+      {% for category, message in flash_messages %}
+        <div class="bg-{{ category }}-100 border border-{{ category }}-400 text-{{ category }}-700 px-4 py-3 rounded relative mb-4" role="alert">
+          <span class="block sm:inline">{{ message }}</span>
+        </div>
+      {% endfor %}
+    {% endif %}
+
+    <div class="bg-white rounded-lg shadow-md overflow-hidden">
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+          <tr>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Company</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+          {% for lead in leads %}
+            <tr>
+              <td class="px-6 py-4 whitespace-nowrap">{{ lead.company_name }}</td>
+              <td class="px-6 py-4 whitespace-nowrap">{{ lead.email }}</td>
+              <td class="px-6 py-4 whitespace-nowrap">{{ lead.status }}</td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <form action="{{ url_for('update_lead_status', lead_id=lead.id) }}" method="post" class="inline">
+                  <select name="new_status" onchange="this.form.submit()" class="border border-gray-300 rounded px-2 py-1">
+                    <option value="New" {% if lead.status == 'New' %}selected{% endif %}>New</option>
+                    <option value="Contacted" {% if lead.status == 'Contacted' %}selected{% endif %}>Contacted</option>
+                    <option value="Qualified" {% if lead.status == 'Qualified' %}selected{% endif %}>Qualified</option>
+                    <option value="Closed" {% if lead.status == 'Closed' %}selected{% endif %}>Closed</option>
+                  </select>
+                </form>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="mt-8">
+      <a href="/index/" class="bg-primary text-white py-2 px-4 rounded hover:bg-primary-dark transition duration-300">Back to Home</a>
+    </div>
+  </main>
+
+  <footer class="bg-gray-800 text-white mt-12 py-6">
+    <div class="container mx-auto text-center">
+      <p>&copy; 2024 Hustler AI. All rights reserved.</p>
+    </div>
+  </footer>
+</body>
+</html>

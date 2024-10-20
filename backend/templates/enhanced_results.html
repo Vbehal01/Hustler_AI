@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hustler AI - Enhanced Research Results</title>
+</head>
+<body>
+  <h1>Results for {{ results['brand_name'] }}</h1>
+  <h2>Industry: {{ results['industry'] }}</h2>
+
+  <h3>Similar brands:</h3>
+  <ul>
+    {% for brand in results['similar_brands'] %}
+      <li>
+        <h4>{{ brand }}</h4>
+        <p>Domain: {{ brand['domain'] if brand['domain'] else 'No domain found' }}</p>
+
+        {% if brand['emails'] %}
+          <h5>Emails found:</h5>
+          <ul>
+            {% for email in brand['emails'] %}
+              <li>{{ email['value'] }} ({{ email['position'] if email['position'] else 'Unknown position' }})</li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <p>No emails found</p>
+        {% endif %}
+      </li>
+    {% endfor %}
+  </ul>
+
+  <h3>Tailored Email:</h3>
+  <p>{{ results['tailored_email'] }}</p>
+</body>
+</html>
