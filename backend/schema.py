@@ -50,7 +50,7 @@ class BrandResearchResponse(BrandResearchCreate):
     name:str
     #industry: Optional[str] = None
     similar_brands: List[str] 
-    emails: List[str] 
+    emails: str 
 
     class Config:
          

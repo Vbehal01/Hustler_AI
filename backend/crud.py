@@ -58,22 +58,22 @@ def create_brand_research(db: Session, brand_research: schema.BrandResearchCreat
 def get_brand_research(db: Session, skip: int = 0, limit: int = 10):
     return db.query(BrandResearch).offset(skip).limit(limit).all()
 
-def update_brand_research(db: Session, research_id: int, industry: str, similar_brands: list, emails: list, tailored_email: str):
-    # Find the existing research entry
-    brand_research = db.query(BrandResearch).filter(BrandResearch.id == research_id).first()
+# def update_brand_research(db: Session, research_id: int, industry: str, similar_brands: list, emails: list, tailored_email: str):
+#     # Find the existing research entry
+#     brand_research = db.query(BrandResearch).filter(BrandResearch.id == research_id).first()
     
-    if not brand_research:
-        raise Exception("Brand research entry not found")
+#     if not brand_research:
+#         raise Exception("Brand research entry not found")
 
-    # Update the fields
-    brand_research.industry = industry
+#     # Update the fields
+#     brand_research.industry = industry
     
-    brand_research.similar_brands = similar_brands
-    brand_research.emails = emails
-    brand_research.tailored_email = tailored_email
+#     brand_research.similar_brands = similar_brands
+#     brand_research.emails = emails
+#     brand_research.tailored_email = tailored_email
 
-    db.commit()  # Commit the changes to the database
-    return brand_research
+#     db.commit()  # Commit the changes to the database
+#     return brand_research
 
 def get_leads(db: Session):
     return db.query(Lead).all()
@@ -185,20 +185,40 @@ def save_research_results(db: Session, results: dict, brand_research_id: int, br
         except Exception as e:
             print(f"Error saving similar brand '{similar_brand}': {e}")
 
-    # Save emails
-    for email in results.get("emails", []):
-        try:
-            create_email(db, email_address=email['value'], brand_research_id=brand_research_id, status=email.get('status'))
-        except Exception as e:
-            print(f"Error saving email: {e}")
-
-    # Fetch or create industry
-    industry_name = results.get(brand_name, {}).get("industry")
-    if industry_name:
-        db_industry = create_industry(db, industry_name)  # Use your existing function to create or fetch industry
-        brand_research = db.query(model.BrandResearch).filter(model.BrandResearch.id == brand_research_id).first()  
+    # Check if brand_name exists in results and is a dictionary
+    brand_info = results.get(brand_name)
+    if isinstance(brand_info, dict):  # Ensure it's a dictionary
+        # Get the first email from the results
+        email = brand_info.get("emails", [{}])[0].get('value')  # Get the first email value
+        if email:
+            try:
+                create_email(db, email_address=email, brand_research_id=brand_research_id, status='active')
+                print(f"Email saved: {email}")
+            except Exception as e:
+                print(f"Error saving email: {e}")
     else:
-        print("Industry not found in results")
-    
+        print(f"Error: '{brand_name}' not found in results or is not a dictionary.")
+
+    # Update the name (industry name) in BrandResearch
+    industry_name = brand_info.get("name") if brand_info else None  # Ensure brand_info is used correctly
+    if industry_name:
+        try:
+            brand_research = db.query(model.BrandResearch).filter(model.BrandResearch.id == brand_research_id).first()
+            if brand_research:
+                brand_research.name = industry_name
+                db.commit()
+                db.refresh(brand_research)
+                print(f"Updated industry name: {industry_name}")
+            else:
+                print(f"Brand research with ID {brand_research_id} not found.")
+        except Exception as e:
+            print(f"Error updating industry name '{industry_name}': {e}")
+    else:
+        print("Industry name not found in results")
+
+    # Save leads if present
     for lead in results.get("leads", []):
-        create_lead(db, name=lead['name'], email=lead['email'], company=lead['company'], status=lead['status'], brand_research_id=brand_research_id)
+        try:
+            create_lead(db, name=lead['name'], email=lead['email'], company=lead['company'], status=lead['status'], brand_research_id=brand_research_id)
+        except Exception as e:
+            print(f"Error saving lead '{lead['name']}': {e}")

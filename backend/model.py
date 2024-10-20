@@ -55,15 +55,6 @@ class Lead(Base):
     def __repr__(self):
         return f"<Lead(id={self.id}, company_name={self.company_name}, email={self.email}, status={self.status})>"
 
-class Industry(Base):
-    __tablename__ = "industry"
-
-    id = Column(Integer, primary_key=True, index=True)
-    name = Column(String, unique=True, index=True)
-
-    # Updated back reference from BrandResearch
-    # brand_research = relationship("BrandResearch", back_populates="industry")
-
 class SimilarBrand(Base):
     __tablename__ = "similar_brands"
 

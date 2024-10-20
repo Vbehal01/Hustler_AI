@@ -15,7 +15,7 @@ import requests
 import logging
 from jose import jwt
 from dotenv import load_dotenv
-from brand_email import research_brand, get_industry
+from brand_email import research_brand, get_industry, update_brand_research
 
 load_dotenv()
 
@@ -150,6 +150,70 @@ def read_user(user_email: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="User not found")
     return db_user
 
+# @app.post("/do_research/")
+# async def do_research(
+#       brand_name: str = Form(...),
+#       user_company_info: str = Form(...),
+#       outreach_goal: str = Form(...),
+#       desired_cta: str = Form(...),
+#       db: Session = Depends(get_db),
+# ):
+#     try:
+#         # Create a new brand research entry using the Pydantic model
+#         brand_research_data = BrandResearchCreate(
+#             brand_name=brand_name,
+#             user_company_info=user_company_info,
+#             outreach_goal=outreach_goal,
+#             desired_cta=desired_cta
+#         )
+#         industry=get_industry(brand_research_data.brand_name)
+#         if industry.endswith('.'):
+#         # Remove the period and return the result
+#          industry = industry[:-1]
+#         # Create a SQLAlchemy model instance
+#         new_research = model.BrandResearch(
+#             brand_name=brand_research_data.brand_name,
+#             user_company_info=brand_research_data.user_company_info,
+#             outreach_goal=brand_research_data.outreach_goal,
+#             desired_cta=brand_research_data.desired_cta,name=industry
+#         )
+
+#         # Add the new research entry to the database
+#         db.add(new_research)
+#         db.commit()
+#         db.refresh(new_research)  # Ensure the instance is up to date
+
+#         # Now perform the research
+#         results = research_brand(db, brand_name, user_company_info, outreach_goal, desired_cta)
+        
+#         # Save the research results
+#         if isinstance(results, dict) and brand_name in results:
+#             # Save the research results
+#             crud.save_research_results(
+#                 db=db,
+#                 results=results,  # Ensure this is correct; it should probably be a model instance or similar.
+#                 brand_research_id=new_research.id,
+#                 brand_name=brand_name
+#             )
+            
+#             # Update the research entry with results
+#             crud.update_brand_research(
+#                 db=db,
+#                 research_id=new_research.id,
+#                 industry=results[brand_name].get("industry"),
+#                 similar_brands=results[brand_name].get("similar_brands"),
+#                 emails=results[brand_name].get("emails"),
+#                 tailored_email=results[brand_name].get("tailored_email")
+#             )
+#             print("Hello")
+#         else:
+#             raise ValueError("Research results are not in the expected format.")
+#         response_model = BrandResearchResponse.model_validate(new_research)  # Using from_orm to convert model to Pydantic model
+#         return response_model  # This will return the full model in the response
+
+#     except Exception as e:
+#         raise HTTPException(status_code=500, detail=f"Research failed: {str(e)}")
+
 @app.post("/do_research/")
 async def do_research(
       brand_name: str = Form(...),
@@ -166,16 +230,19 @@ async def do_research(
             outreach_goal=outreach_goal,
             desired_cta=desired_cta
         )
-        industry=get_industry(brand_research_data.brand_name)
-        if industry.endswith('.'):
-        # Remove the period and return the result
-         industry = industry[:-1]
+
+        # Fetch the name directly, instead of an industry object
+        name = get_industry(brand_research_data.brand_name)  # Assuming 'get_industry' is now fetching 'name'
+        if name.endswith('.'):
+            name = name[:-1]
+
         # Create a SQLAlchemy model instance
         new_research = model.BrandResearch(
             brand_name=brand_research_data.brand_name,
             user_company_info=brand_research_data.user_company_info,
             outreach_goal=brand_research_data.outreach_goal,
-            desired_cta=brand_research_data.desired_cta,name=industry
+            desired_cta=brand_research_data.desired_cta,
+            name=name  # Storing the 'name' directly
         )
 
         # Add the new research entry to the database
@@ -184,32 +251,36 @@ async def do_research(
         db.refresh(new_research)  # Ensure the instance is up to date
 
         # Now perform the research
-        results = research_brand(brand_name, user_company_info, outreach_goal, desired_cta)
+        results = research_brand(db, brand_name, user_company_info, outreach_goal, desired_cta)
         
         # Save the research results
         if isinstance(results, dict) and brand_name in results:
             # Save the research results
             crud.save_research_results(
                 db=db,
-                results=results,  # Ensure this is correct; it should probably be a model instance or similar.
+                results=results,
                 brand_research_id=new_research.id,
                 brand_name=brand_name
             )
             
             # Update the research entry with results
-            crud.update_brand_research(
+            industry_name = results[brand_name].get("name")  # Fetching the industry name here
+            update_brand_research(
                 db=db,
                 research_id=new_research.id,
-                industry=results[brand_name].get("industry"),
+                name=industry_name,  # Use the fetched industry name
                 similar_brands=results[brand_name].get("similar_brands"),
                 emails=results[brand_name].get("emails"),
                 tailored_email=results[brand_name].get("tailored_email")
             )
+
             print("Hello")
         else:
             raise ValueError("Research results are not in the expected format.")
-        response_model = BrandResearchResponse.model_validate(new_research)  # Using from_orm to convert model to Pydantic model
-        return response_model  # This will return the full model in the response
+        
+        # Return response model
+        response_model = BrandResearchResponse.model_validate(new_research)
+        return response_model
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Research failed: {str(e)}")
